@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         score = 0;
-        scoreText.text = "Score: " + score;
+        //scoreText.text = "Score: " + score;
     }
 
     private void OnTriggerStay2D(Collider2D collision)
@@ -29,6 +29,6 @@ public class GameManager : MonoBehaviour
     public void scoreAdd(int i)
     {
         score += i;
-        scoreText.text = "Score: " + score;
+        //scoreText.text = "Score: " + score;
     }
 }

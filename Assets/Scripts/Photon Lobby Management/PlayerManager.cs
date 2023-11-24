@@ -15,7 +15,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     private GameObject rightSpawn;
 
     GameObject controller;
-    playerController PlayerController;
+    photonPlayerController PlayerController;
+
+    [SerializeField] private AnimationCurve timeSlowCurve;
+
+    [SerializeField] GameObject winScreen;
+    [SerializeField] GameObject LoseScreen;
 
 
     private void Awake()
@@ -50,14 +55,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             spawnPoint = rightSpawn.transform;
         }
 
-        //Debug.Log("AVATAR NUMBER " + (int)PhotonNetwork.LocalPlayer.CustomProperties["playerAvatar"]);
-        Debug.Log("Found Spawn");
-        GameObject playerToSpawn = playerPrefabs[(int)PhotonNetwork.LocalPlayer.CustomProperties["playerAvatar"]];
-        Debug.Log("Found Spawn Game Object");
-        controller = PhotonNetwork.Instantiate(playerToSpawn.name, spawnPoint.position, Quaternion.identity, 0, new object[] { PV.ViewID });
-        Debug.Log("End Spawn");
 
-        PlayerController = controller.GetComponent<playerController>();
+        //0 if host
+        GameObject playerToSpawn = playerPrefabs[PhotonNetwork.IsMasterClient? 0 : 1];
+
+        controller = PhotonNetwork.Instantiate(playerToSpawn.name, spawnPoint.position, Quaternion.identity, 0, new object[] { PV.ViewID });
+        
+
+        PlayerController = controller.GetComponent<photonPlayerController>();
 
        
     }
@@ -77,5 +82,62 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         return controller.GetComponent<playerController>();
     }
 
+    public void loseGame()
+    {
+        if (PV.IsMine)
+        {
+            // Tell everyone Game is Over
+            PV.RPC(nameof(RPC_WinGame), RpcTarget.Others);
+            StartCoroutine(LoseCoroutine());
+        }
+    }
+
+    [PunRPC]
+    void RPC_WinGame()
+    {
+        StartCoroutine(WinCoroutine());
+    }
+
+    private IEnumerator LoseCoroutine()
+    {
+        LoseScreen.SetActive(true);
+
+        /*
+        float timeElapsed = 0;
+        while (timeElapsed < 3f)
+        {
+            Time.timeScale = timeSlowCurve.Evaluate(timeElapsed / 3);
+            timeElapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        yield return new WaitForSecondsRealtime(2f);
+        Time.timeScale = 1;*/
+
+        yield return new WaitForSecondsRealtime(5f);
+
+        PhotonNetwork.LoadLevel("Lobby");
+
+    }
+
+    private IEnumerator WinCoroutine()
+    {
+        winScreen.SetActive(true);
+
+        /*
+        float timeElapsed = 0;
+        while (timeElapsed < 3f)
+        {
+            Time.timeScale = timeSlowCurve.Evaluate(timeElapsed / 3);
+            timeElapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        yield return new WaitForSecondsRealtime(2f);
+        Time.timeScale = 1;
+        */
+        yield return new WaitForSecondsRealtime(5f);
+
+        PhotonNetwork.LoadLevel("Lobby");
+
+    }
 
 }
