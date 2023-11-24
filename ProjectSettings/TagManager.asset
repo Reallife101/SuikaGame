@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Game Manager
+  - RightSpawn
+  - LeftSpawn
   layers:
   - Default
   - TransparentFX
